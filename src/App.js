@@ -1,11 +1,10 @@
-import './App.css';
+import React from "react";
+import Tasks from "./Components/Tasks";
 
-function App() {
+export default function App() {
   return (
-    <div className="App">
-      Create React App
-    </div>
+    <>
+      <Tasks />
+    </>
   );
 }
-
-export default App;
