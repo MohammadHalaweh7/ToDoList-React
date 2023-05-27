@@ -1,83 +1,86 @@
 import React, { useEffect, useState } from "react";
 import Task from "./Task";
 import Swal from "sweetalert2";
-import Modal from "./Modal";
+import AddTaskModal from "./AddTaskModal";
 
 export default function Tasks() {
   const [dataParsed, setDataParsed] = useState([]);
-  const [toggle, setToggle] = useState(0);
+  const [isData, setIsData] = useState(false);
+  const [toggle, setToggle] = useState(false);
   const [token, setToken] = useState("");
 
-  console.log(token);
-
-  function showSuccessPopup()
-  {
+  function showSuccessPopup() {
     Swal.fire("Good job!", "You clicked the button!", "success");
   }
 
+  const parsingData = (data) => {
+    return JSON.stringify(data);
+  };
 
   function getDataFromLocalStorage() {
     const jsonFormatData = localStorage.getItem("Tasks");
-    try {
-      return JSON.parse(jsonFormatData) || [];
-    } catch {
-      return [];
+    console.log(jsonFormatData);
+    if (jsonFormatData) {
+      const todos = JSON.parse(jsonFormatData);
+      setDataParsed(todos);
+      setIsData(true);
     }
   }
 
-  function addToLocalStorage(name, assignee) {
+  function onAddClick(name, assignee) {
     let dataObject = {
-      id: `${Math.random() * 1232}`,
-      done: 0,
+      id: dataParsed.length,
+      done: false,
       name,
       assignee,
-      
     };
-    dataParsed.push(dataObject);
-    setDataParsed(dataParsed);
-    let localStorageData = JSON.stringify(dataParsed);
+
+    const updatedData = [...dataParsed, dataObject];
+    const localStorageData = parsingData(updatedData);
+
+    setDataParsed(updatedData);
     localStorage.setItem("Tasks", localStorageData);
     showSuccessPopup();
-    setTimeout(() => {
-      window.location.reload();
-    }, 1400);
   }
 
   function displayData() {
     return dataParsed
       .filter((task) => task.name.toLowerCase().includes(token))
-      .map((element, key) => {
-        return element.done == toggle ? (
-          <Task
-            id={key}
-            name={element.name}
-            assignee={element.assignee}
-            doneAttribute={element.done}
-            setItemDone={() => setItemDone(key)}
-            deleteTask={() => deleteTask(key)}
-          />
+      .map((element, id) => {
+        return element.done === toggle ? (
+          <div key={id}>
+            <Task
+              name={element.name}
+              assignee={element.assignee}
+              isDone={element.done}
+              onComplete={() => onComplete(id)}
+              onDelete={() => onDelete(id)}
+            />
+          </div>
         ) : (
           ""
         );
       });
   }
 
-  function setItemDone(id) {
-    dataParsed.find((element) => {
-      if (dataParsed.indexOf(element) == id) {
-        dataParsed[id].done = 1;
+  function onComplete(id) {
+    console.log(id);
+    const updatedData = dataParsed.map((element) => {
+      console.log(element.id);
+      if (element.id === id) {
+        return { ...element, done: true };
       }
-      setDataParsed(dataParsed);
-      const localStorageData = JSON.stringify(dataParsed);
-      localStorage.setItem("Tasks", localStorageData);
-      showSuccessPopup();
-      setTimeout(() => {
-        window.location.reload();
-      }, 1400);
+      return element;
     });
+
+    setDataParsed(updatedData);
+    const localStorageData = parsingData(updatedData);
+    localStorage.setItem("Tasks", localStorageData);
+    showSuccessPopup();
+    setIsData(false);
   }
 
-  function deleteTask(id) {
+  function onDelete(id) {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -87,29 +90,30 @@ export default function Tasks() {
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
+      if (!result.isConfirmed) return;
       if (result.isConfirmed) {
         dataParsed.find((element) => {
           if (dataParsed.indexOf(element) == id) {
             dataParsed.splice(id, 1);
           }
           setDataParsed(dataParsed);
-          let localStorageData = JSON.stringify(dataParsed);
+          const localStorageData = parsingData(dataParsed);
           localStorage.setItem("Tasks", localStorageData);
           Swal.fire("Deleted!", "Your file has been deleted.", "success");
-
-          setTimeout(() => {
-            window.location.reload();
-          }, 1400);
         });
+        setIsData(false);
       }
     });
   }
 
   function renderCounter() {
+    // dataParsed.reduce((acc, cur) => {
+    //   return 
+    // })
     let donesCount = 0;
     let todoCount = 0;
     dataParsed.map((task) => {
-      if (task.done == 1) {
+      if (task.done == true) {
         donesCount++;
       } else {
         todoCount++;
@@ -126,28 +130,26 @@ export default function Tasks() {
   }
 
   useEffect(() => {
-    setDataParsed(getDataFromLocalStorage());
-  }, []);
+    getDataFromLocalStorage();
+  }, [isData]);
 
   return (
     <>
       <h1 className="title">ToDo List React</h1>
       <div className="tasks-container">
-
         <div className="tasks-table">
-
           <div className="controlBar">
-
-            <div class="form-check form-switch">
+            <div className="form-check form-switch">
               <input
                 className="form-check-input"
                 type="checkbox"
                 id="toggledBtn"
-                onClick={() => {
-                  setToggle(!toggle);
+                onClick={(e) => {
+                  console.log(e.target.checked);
+                  setToggle(e.target.checked);
                 }}
               />
-              <label class="form-check-label" for="toggledBtn">
+              <label className="form-check-label" htmlFor="toggledBtn">
                 Filter by completed tasks
               </label>
             </div>
@@ -159,7 +161,7 @@ export default function Tasks() {
                 }}
                 type="text"
                 placeholder="Search by task name... "
-                class="form-control mt-5 mb-5"
+                className="form-control mt-5 mb-5"
               ></input>
             </div>
 
@@ -168,28 +170,24 @@ export default function Tasks() {
             <div>
               <button
                 type="button"
-                class="btn btn-primary "
+                className="btn btn-primary "
                 data-bs-toggle="modal"
                 data-bs-target="#exampleModal"
               >
-                <i class="fa-solid fa-plus"></i>
+                <i className="fa-solid fa-plus"></i>
               </button>
             </div>
-
           </div>
 
           <div className="tasksTable">
             <div id="tasksTable" className="tasks-table-container">
               {displayData()}
             </div>
-
           </div>
-
         </div>
-
       </div>
 
-      <Modal addToLocalStorage={addToLocalStorage} />
+      <AddTaskModal onAddClick={onAddClick} />
     </>
   );
 }

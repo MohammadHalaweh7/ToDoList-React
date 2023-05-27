@@ -1,12 +1,5 @@
 import React from "react";
-export default function Task({
-  id,
-  name,
-  assignee,
-  setItemDone,
-  deleteTask,
-  doneAttribute,
-}) {
+export default function Task({ name, assignee, onComplete, onDelete, isDone }) {
   return (
     <>
       <div className="taskDiv d-flex justify-content-between">
@@ -16,14 +9,23 @@ export default function Task({
         </div>
 
         <div>
-          <button onClick={deleteTask} type="button" className="btn btn-danger d-block mb-2">
-            <i class="fa-solid fa-trash-can"></i>
+          <button
+            onClick={onDelete}
+            type="button"
+            className="btn btn-danger d-block mb-2"
+          >
+            <i className="fa-solid fa-trash-can"></i>
           </button>
 
-          {doneAttribute ? ("") : (<button onClick={setItemDone} type="button" className="btn btn-success">
-              <i class="fa-solid fa-check"></i>
+          {!isDone ? (
+            <button
+              onClick={onComplete}
+              type="button"
+              className="btn btn-success"
+            >
+              <i className="fa-solid fa-check"></i>
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </>
