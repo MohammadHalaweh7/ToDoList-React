@@ -1,10 +1,10 @@
 import React from "react";
-import Tasks from "./Components/Tasks";
+import TasksWrapper from "./Components/TasksWrapper";
 
 export default function App() {
   return (
     <>
-      <Tasks />
+      <TasksWrapper />
     </>
   );
 }
