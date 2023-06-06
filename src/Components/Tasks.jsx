@@ -1,35 +1,25 @@
-import React from "react"
-import Task from "./Task"
+import React from "react";
+import Task from "./Task";
 
 export default function Tasks({ tasks, onComplete, onDelete, toggle, token }) {
-  let filteredTasks
-  if (toggle) {
-    filteredTasks = tasks.filter((task) => task.done === true)
-  } else {
-    filteredTasks = tasks.filter((task) => task.done === false)
-  }
-
-  if (token) {
-    filteredTasks = tasks.filter((task) =>
-      task.taskname?.toLowerCase().includes(token)
-    )
-    console.log(token)
-  }
+  const filteredTasks = tasks.filter(
+    (task) =>
+      task.done === toggle &&
+      (token
+        ? task.taskname?.toLowerCase().includes(token.toLowerCase())
+        : true)
+  );
 
   return (
     <>
-      {filteredTasks
-        ? filteredTasks.map((task) => (
-            <div key={task.id}>
-              <Task
-                {...task} 
-                onComplete={onComplete}
-                onDelete={onDelete}
-                toggle={toggle}
-              />
-            </div>
-          ))
-        : ""}
+      {filteredTasks.map((task) => (
+        <Task
+          {...task}
+          onComplete={onComplete}
+          onDelete={onDelete}
+          toggle={toggle}
+        />
+      ))}
     </>
-  )
+  );
 }

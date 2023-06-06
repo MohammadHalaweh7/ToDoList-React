@@ -9,34 +9,39 @@ export default function TasksWrapper() {
     { id: 0, taskname: "Hello", assignee: "World", done: false },
     { id: 1, taskname: "Hello2", assignee: "World2", done: true },
   ]);
-  const [isData, setIsData] = useState(false);
   const [toggle, setToggle] = useState(false);
   const [token, setToken] = useState("");
-  const [tasksCount, setTasksCount] = useState(dataParsed.length);
-  const [completedTasksCount, setCompletedTasksCount] = useState(
-    dataParsed.filter((task) => task.done === true).length
-  );
+
+  const tasksCount = dataParsed.length;
+  const completedTasksCount = dataParsed.filter((task) => task.done).length;
+
+  const LOCALSTORAGE_KEY = "Tasks";
+
+  function syncLocalStorage() {
+    const dataStringified = parseData(dataParsed);
+    localStorage.setItem("Tasks", dataStringified);
+  }
 
   function showSuccessPopup() {
     Swal.fire("Good job!", "You clicked the button!", "success");
   }
 
-  const parsingData = (data) => {
+  const parseData = (data) => {
     return JSON.stringify(data);
   };
 
   function getDataFromLocalStorage() {
-    const jsonFormatData = localStorage.getItem("Tasks");
-    console.log(jsonFormatData);
-    if (jsonFormatData) {
-      const todos = JSON.parse(jsonFormatData);
+    try {
+      const jsonFormatData = localStorage.getItem(LOCALSTORAGE_KEY);
+      const todos = JSON.parse(jsonFormatData) || [];
       setDataParsed(todos);
-      setIsData(true);
+    } catch {
+      return [];
     }
   }
 
   function onAddClick(taskname, assignee) {
-    let dataObject = {
+    const dataObject = {
       id: dataParsed.length,
       done: false,
       taskname,
@@ -44,10 +49,10 @@ export default function TasksWrapper() {
     };
 
     const updatedData = [...dataParsed, dataObject];
-    const localStorageData = parsingData(updatedData);
+    const localStorageData = parseData(updatedData);
 
     setDataParsed(updatedData);
-    localStorage.setItem("Tasks", localStorageData);
+    localStorage.setItem(LOCALSTORAGE_KEY, localStorageData);
     showSuccessPopup();
   }
 
@@ -61,10 +66,9 @@ export default function TasksWrapper() {
     });
 
     setDataParsed(updatedData);
-    const localStorageData = parsingData(updatedData);
-    localStorage.setItem("Tasks", localStorageData);
+    syncLocalStorage();
+
     showSuccessPopup();
-    setIsData(false);
   }
 
   function onDelete(id) {
@@ -85,24 +89,14 @@ export default function TasksWrapper() {
       }));
 
       setDataParsed(updatedDataWithIDs);
-      const localStorageData = parsingData(updatedDataWithIDs);
-      localStorage.setItem("Tasks", localStorageData);
+      syncLocalStorage();
       Swal.fire("Deleted!", "Your file has been deleted.", "success");
-      setIsData(false);
-      setIsData(true); // Trigger re-render
     });
   }
 
   useEffect(() => {
     getDataFromLocalStorage();
-  }, [isData]);
-
-  useEffect(() => {
-    setTasksCount(dataParsed.length);
-    setCompletedTasksCount(
-      dataParsed.filter((task) => task.done === true).length
-    );
-  }, [dataParsed]);
+  }, []);
 
   return (
     <>
@@ -114,6 +108,8 @@ export default function TasksWrapper() {
             setToken={setToken}
             tasksCount={tasksCount}
             completedTasksCount={completedTasksCount}
+            toggle={toggle}
+            token={token}
           />
           <TaskList
             dataParsed={dataParsed}

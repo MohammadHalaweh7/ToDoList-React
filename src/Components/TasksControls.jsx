@@ -5,7 +5,10 @@ export default function TasksControl({
   setToken,
   tasksCount,
   completedTasksCount,
+  toggle,
+  token
 }) {
+
   return (
     <>
       <div className='controlBar'>
@@ -14,6 +17,7 @@ export default function TasksControl({
             className='form-check-input'
             type='checkbox'
             id='toggledBtn'
+            value={toggle}
             onClick={(e) => {
               console.log(e.target.checked)
               setToggle(e.target.checked)
@@ -26,6 +30,7 @@ export default function TasksControl({
 
         <div>
           <input
+          value={token}
             onChange={(e) => {
               setToken(e.target.value)
             }}

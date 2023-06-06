@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 export default function Modal({ onAddClick }) {
-  const [taskname, setTaskName] = useState();
+  const [taskName, setTaskName] = useState();
   const [assignee, setAssignee] = useState();
 
   return (
@@ -30,7 +30,8 @@ export default function Modal({ onAddClick }) {
               <input
                 type="text"
                 className="form-control"
-                id="taskname"
+                id="taskName"
+                value={taskName}
                 onChange={(e) => {
                   setTaskName(e.target.value);
                 }}
@@ -42,6 +43,7 @@ export default function Modal({ onAddClick }) {
                 type="text"
                 className="form-control"
                 id="assignee"
+                value={assignee}
                 onChange={(e) => {
                   setAssignee(e.target.value);
                 }}
@@ -55,7 +57,7 @@ export default function Modal({ onAddClick }) {
               className="btn btn-primary"
               data-bs-dismiss="modal"
               onClick={() => {
-                onAddClick(taskname, assignee);
+                onAddClick(taskName, assignee);
               }}
             >
               Add
